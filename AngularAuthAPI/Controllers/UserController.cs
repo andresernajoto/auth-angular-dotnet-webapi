@@ -1,3 +1,5 @@
+using System.Reflection.Emit;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 using System.Text;
 using System;
@@ -9,6 +11,8 @@ using AngularAuthAPI.Helpers;
 using AngularAuthAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AngularAuthAPI.Controllers
 {
@@ -31,7 +35,12 @@ namespace AngularAuthAPI.Controllers
 
             if (!PasswordHasher.VerifyPassword(userObj.Password, user.Password)) { return BadRequest(new { Message = "Password is incorret!" }); }
 
-            return Ok(new { Message = "User logged successfully!"});
+            user.Token = CreateJwtToken(user);
+
+            return Ok(new {
+                Token = user.Token,
+                Message = "User logged successfully!"
+            });
         }
 
         [HttpPost("register")]
@@ -79,6 +88,32 @@ namespace AngularAuthAPI.Controllers
             if ((!Regex.IsMatch(password, "[<,>,@,!,#,$,%,^,&,*,(,),_,+,\\[,\\],{,},?,:,;,|,',\\,.,/,~,`,-,=]"))) { sb.Append("Password should contain any special character" + Environment.NewLine); }
 
             return sb.ToString();
+        }
+
+        private string CreateJwtToken(User userObj) {
+            JwtSecurityTokenHandler jwtTokenHandler = new();
+            var key = Encoding.ASCII.GetBytes("veryverysecret.....");
+            var identity = new ClaimsIdentity(new Claim[] {
+                new Claim(ClaimTypes.Role, userObj.Role),
+                new Claim(ClaimTypes.Name, $"{userObj.FirstName} {userObj.LastName}")
+            });
+
+            var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
+
+            var tokenDescriptor = new SecurityTokenDescriptor{
+                Subject = identity,
+                Expires = DateTime.Now.AddDays(1),
+                SigningCredentials = credentials
+            };
+
+            var token = jwtTokenHandler.CreateToken(tokenDescriptor);
+
+            return jwtTokenHandler.WriteToken(token);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<User>> GetAllUsers() {
+            return Ok(await _context.Users.ToListAsync());
         }
     }
 }
