@@ -25,9 +25,11 @@ namespace AngularAuthAPI.Controllers
         public async Task<IActionResult> Authenticate([FromBody] User userObj) {
             if (userObj == null) { return BadRequest(); }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == userObj.Username && u.Password == userObj.Password);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == userObj.Username);
 
             if (user == null) { return NotFound(new { Message = "User not found!" }); }
+
+            if (!PasswordHasher.VerifyPassword(userObj.Password, user.Password)) { return BadRequest(new { Message = "Password is incorret!" }); }
 
             return Ok(new { Message = "User logged successfully!"});
         }

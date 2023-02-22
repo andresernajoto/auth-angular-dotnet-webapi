@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgToastService } from 'ng-angular-popup';
 import ValidateForm from 'src/app/helpers/validate.form';
 import { AuthService } from 'src/app/services/auth.service';
 
@@ -15,7 +16,7 @@ export class LoginComponent implements OnInit {
   eyeIcon: string = 'bi-eye-slash'
   loginForm!: FormGroup
 
-  constructor(private formBuilder: FormBuilder, private auth: AuthService, private router: Router) { }
+  constructor(private formBuilder: FormBuilder, private auth: AuthService, private router: Router, private toast: NgToastService) { }
 
   ngOnInit(): void {
     this.loginForm = this.formBuilder.group({
@@ -34,12 +35,12 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.valid) {
       this.auth.login(this.loginForm.value).subscribe({
         next: res => {
-          alert(res.message)
           this.loginForm.reset()
+          this.toast.success({ detail: 'SUCCESS', summary: res.message, duration: 5000 })
           this.router.navigate(['dashboard'])
         },
         error: err => {
-          alert(err?.error.message)
+          this.toast.error({ detail: 'ERROR', summary: 'Something went wrong!', duration: 5000 })
         }
       })
 
