@@ -36,18 +36,19 @@ export class LoginComponent implements OnInit {
       this.auth.login(this.loginForm.value).subscribe({
         next: res => {
           this.loginForm.reset()
-          this.toast.success({ detail: 'SUCCESS', summary: res.message, duration: 5000 })
+          this.auth.storeToken(res.token)
+          this.toast.success({ detail: 'SUCCESS', summary: res.message, duration: 3000 })
           this.router.navigate(['dashboard'])
         },
         error: err => {
-          this.toast.error({ detail: 'ERROR', summary: 'Something went wrong!', duration: 5000 })
+          this.toast.error({ detail: 'ERROR', summary: 'Something went wrong!', duration: 3000 })
         }
       })
 
     } else {
       // throw error and show toastr
       ValidateForm.validateAllFormFields(this.loginForm)
-      alert('Your form is invalid!')
+      this.toast.error({ detail: 'ERROR', summary: 'Your form is invalid!', duration: 3000 })
     }
   }
 }

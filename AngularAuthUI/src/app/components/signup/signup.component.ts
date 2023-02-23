@@ -39,17 +39,17 @@ export class SignupComponent  implements OnInit {
       this.auth.signUp(this.signUpForm.value).subscribe({
         next: res => {
           this.signUpForm.reset()
-          this.toast.success({ detail: 'SUCCESS', summary: res.message, duration: 5000 })
+          this.toast.success({ detail: 'SUCCESS', summary: res.message, duration: 3000 })
           this.router.navigate(['login'])
         },
         error: err => {
-          this.toast.error({ detail: 'ERROR', summary: 'Something went wrong!', duration: 5000 })
+          this.toast.error({ detail: 'ERROR', summary: 'Something went wrong!', duration: 3000 })
         }
       })
     } else {
       // throw error and show toastr
       ValidateForm.validateAllFormFields(this.signUpForm)
-      alert('Your form is invalid!')
+      this.toast.error({ detail: 'ERROR', summary: 'Your form is invalid!', duration: 3000 })
     }
   }
 }
