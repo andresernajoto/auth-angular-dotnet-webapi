@@ -34,7 +34,7 @@ export class DashboardComponent implements OnInit {
   
   signOut() {
     this.auth.signOut()
-    this.toast.success({ detail: 'SUCCESS', summary: 'User logged out successfully!' })
+    this.toast.success({ detail: 'SUCCESS', summary: 'User logged out successfully!', duration: 3000 })
   }
   
 }
