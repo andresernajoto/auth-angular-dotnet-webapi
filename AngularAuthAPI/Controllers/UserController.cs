@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AngularAuthAPI.Controllers
 {
@@ -102,15 +103,16 @@ namespace AngularAuthAPI.Controllers
 
             var tokenDescriptor = new SecurityTokenDescriptor{
                 Subject = identity,
-                Expires = DateTime.Now.AddDays(1),
-                SigningCredentials = credentials
+                SigningCredentials = credentials,
+                Expires = DateTime.UtcNow.AddDays(1)
             };
 
             var token = jwtTokenHandler.CreateToken(tokenDescriptor);
 
             return jwtTokenHandler.WriteToken(token);
         }
-
+        
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<User>> GetAllUsers() {
             return Ok(await _context.Users.ToListAsync());

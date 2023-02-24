@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NgToastService } from 'ng-angular-popup';
+import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
@@ -8,10 +9,14 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  constructor(private auth: AuthService, private toast: NgToastService) { }
+  public users:any = []
+  
+  constructor(private auth: AuthService, private api: ApiService, private toast: NgToastService) { }
 
   ngOnInit() {
-
+    this.api.getUsers().subscribe(res => {
+      this.users = res
+    })
   }
   
   logOut() {
