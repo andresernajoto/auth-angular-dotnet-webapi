@@ -1,6 +1,103 @@
-<button (click)="logOut()" class="btn btn-danger">Log out</button>
-<p>dashboard works!</p>
+<header class="d-flex justify-content-between align-items-center text-white" style="background-color: #424242; box-shadow: 10px 5.5px 5px rgba(0, 0, 0, 0.4);">
+  <div class="px-4 py-2">
+    <a>Hello, <h4 class="px-2">{{ fullName }}</h4></a>
+  </div>
 
-<ul *ngFor="let user of users">
-    <li>{{ user.username }}</li>
-</ul>
+  <div class="px-4 mb-4">
+    <a (click)="signOut()" class="btn btn-outline-danger" href="#" role="button">Sign out</a>
+  </div>  
+</header>
+
+<div class="main-container d-flex">
+  <ng-container *ngIf="role === 'Admin'">
+    <div class="sidebar" id="side-nav">
+      <ul class="list-unstyled px-3 py-3" style="font-size: 1.2rem;">
+        <li>
+          <a href="#" class="text-decoration-none" routerLink="/dashboard"><i class="bi bi-house-fill p-2"></i>Dashboard</a>
+        </li>
+    
+        <li>
+          <a href="#" class="text-decoration-none"><i class="bi bi-file-earmark-fill p-2"></i>Orders</a>
+        </li>
+    
+        <li>
+          <a href="#" class="text-decoration-none"><i class="bi bi-basket2-fill p-2"></i>Products</a>
+        </li>
+    
+        <li>
+          <a href="#" class="text-decoration-none"><i class="bi bi-people-fill p-2"></i>Customers</a>
+        </li>
+    
+        <li>
+          <a href="#" class="text-decoration-none"><i class="bi bi-pie-chart-fill p-2"></i>Reports</a>
+        </li>
+    
+        <li>
+          <a href="#" class="text-decoration-none"><i class="bi bi-gear-wide-connected p-2"></i>Integrations</a>
+        </li>
+      </ul> <hr />
+    
+      <h4 class="px-3">Saved reports <span class="fs-6"><i class="bi bi-plus-circle-fill p-2"></i></span></h4>
+    
+      <ul class="list-unstyled px-3 py-2" style="font-size: 1.2rem;">
+        <li>
+          <a href="#" class="text-decoration-none"><i class="bi bi-clipboard-data-fill p-2"></i>Current month</a>
+        </li>
+    
+        <li>
+          <a href="#" class="text-decoration-none"><i class="bi bi-clipboard-data-fill p-2"></i>Last quarter</a>
+        </li>
+    
+        <li>
+          <a href="#" class="text-decoration-none"><i class="bi bi-clipboard-data-fill p-2"></i>Social engagement</a>
+        </li>
+    
+        <li>
+          <a href="#" class="text-decoration-none"><i class="bi bi-clipboard-data-fill p-2"></i>Year-end-sale</a>
+        </li>
+      </ul>
+    </div>
+  </ng-container>
+  
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="mt-4">Dashboard</h2>
+
+      <div class="grid gap-3">
+        <div class="btn-group px-3 g-col-6" role="group">
+          <button class="btn btn-outline-dark">Share</button>
+          <button class="btn btn-outline-dark">Export</button>
+        </div>
+        
+        <button class="btn btn-outline-dark px-3 g-col-6"><i class="bi bi-calendar3 px-2"></i>This week</button>
+      </div>
+    </div> <hr />
+
+    <div>
+      <h2>Employee List</h2> <br />
+
+      <div class="table-responsive">
+        <table class="table table-bordered text-center">
+          <thead class="table-dark" style="font-size: 1.1rem;">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">First Name</th>
+              <th scope="col">Last Name</th>
+              <th scope="col">Username</th>
+              <th scope="col">Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users; let i = index">
+              <td>{{ i+1 }}</td>
+              <td>{{ user.firstName }}</td>
+              <td>{{ user.lastName }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

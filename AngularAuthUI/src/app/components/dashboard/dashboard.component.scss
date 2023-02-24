@@ -1,0 +1,23 @@
+#side-nav {
+    background-color: #e5e5e0;
+    min-width: 250px;
+    max-width: 250px;
+    min-height: 100vh;
+}
+
+.sidebar li.active {
+    background-color: #000;
+    border-radius: 8px;
+}
+
+.sidebar li.active a, .sidebar li.active a:hover {
+    color: #fff;
+}
+
+.sidebar li a {
+    color: #000;
+}
+
+li {
+    margin: 5px 0 5px 0;
+}
