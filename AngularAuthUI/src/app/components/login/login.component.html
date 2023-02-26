@@ -30,8 +30,8 @@
                                 *Password is required
                             </small>
 
-                            <div class="form-inline fr mt-4">
-                                <a id="forget" class="font-weight-bold">Forgot your password?</a>
+                            <div class="form-inline fr mt-4 d-flex justify-content-end">
+                                <a id="forget" class="font-weight-bold"data-bs-toggle="modal" data-bs-target="#exampleModal">Forgot your password?</a>
                             </div>
 
                             <div>
@@ -60,6 +60,37 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title" id="exampleModalLabel">
+                    <span style="font-size: 25px; font-weight: 700;">Forgot your password?</span> <br />
+                    <small>Please, provide your <strong>email</strong> and we'll send you the reset link.</small>
+                </p>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group pt-3">
+                    <div class="input-field">
+                        <i class="bi bi-at p-2"></i> <input [(ngModel)]="resetPasswordEmail" (ngModelChange)="checkValidEmail($event)" type="text" placeholder="Email">
+                    </div>
+                </div>
+
+                <small *ngIf="!resetPasswordEmail" class="text-danger">*Email is required</small> <br />
+                <small *ngIf="!isValidEmail && resetPasswordEmail" class="text-danger">*Email is invalid*</small>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" id="close-btn" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" (click)="confirmToSend()" class="btn btn-primary">Send</button>
             </div>
         </div>
     </div>

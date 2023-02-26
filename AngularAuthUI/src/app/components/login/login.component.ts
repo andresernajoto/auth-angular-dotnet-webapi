@@ -17,6 +17,9 @@ export class LoginComponent implements OnInit {
   eyeIcon: string = 'bi-eye-slash'
   loginForm!: FormGroup
 
+  public resetPasswordEmail!: string
+  public isValidEmail!: boolean
+
   constructor(private formBuilder: FormBuilder, private auth: AuthService, private router: Router, private toast: NgToastService, private userStore: UserStoreService) { }
 
   ngOnInit(): void {
@@ -57,5 +60,24 @@ export class LoginComponent implements OnInit {
       ValidateForm.validateAllFormFields(this.loginForm)
       this.toast.error({ detail: 'ERROR', summary: 'Your form is invalid!', duration: 3000 })
     }
+  }
+
+  checkValidEmail(event: string) {
+    const val = event
+    const pattern = /\S+@\S+\.\S+/
+    this.isValidEmail = pattern.test(val)
+
+    return this.isValidEmail
+  }
+
+  confirmToSend() {
+    if (this.checkValidEmail(this.resetPasswordEmail)) { console.log(this.resetPasswordEmail) }
+
+    this.resetPasswordEmail = ''
+
+    const buttonRef = document.getElementById('close-btn')
+    buttonRef?.click()
+
+    // api call
   }
 }
