@@ -1,12 +1,7 @@
 using System.Security.Cryptography;
-using System.Reflection.Emit;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using System.Text;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AngularAuthAPI.Context;
 using AngularAuthAPI.Helpers;
 using AngularAuthAPI.Models;
@@ -16,6 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using AngularAuthAPI.Models.Dto;
+using AngularAuthAPI.Utility;
 
 namespace AngularAuthAPI.Controllers
 {
@@ -24,12 +20,19 @@ namespace AngularAuthAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public UserController(AppDbContext context) {
+        private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
+
+        public UserController(AppDbContext context, IConfiguration configuration, IEmailService emailService)
+        {
             _context = context;
+            _configuration = configuration;
+            _emailService = emailService;
         }
 
         [HttpPost("authenticate")]
-        public async Task<IActionResult> Authenticate([FromBody] User userObj) {
+        public async Task<IActionResult> Authenticate([FromBody] User userObj)
+        {
             if (userObj == null) { return BadRequest(); }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == userObj.Username);
@@ -48,14 +51,16 @@ namespace AngularAuthAPI.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(new TokenApiDto() {
+            return Ok(new TokenApiDto()
+            {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken
             });
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] User userObj) {
+        public async Task<IActionResult> Register([FromBody] User userObj)
+        {
             if (userObj == null) { return BadRequest(); }
 
             // check username
@@ -67,7 +72,7 @@ namespace AngularAuthAPI.Controllers
             // check password strength
             var pass = CheckPasswordStrength(userObj.Password);
 
-            if (!string.IsNullOrEmpty(pass)) { return BadRequest(new { Message = pass.ToString() });}
+            if (!string.IsNullOrEmpty(pass)) { return BadRequest(new { Message = pass.ToString() }); }
 
             userObj.Password = PasswordHasher.HashPassword(userObj.Password);
             userObj.Role = "User";
@@ -76,23 +81,27 @@ namespace AngularAuthAPI.Controllers
             await _context.Users.AddAsync(userObj);
             await _context.SaveChangesAsync();
 
-            return Ok(new { Message = "User registered successfully!"});
+            return Ok(new { Message = "User registered successfully!" });
         }
 
-        private async Task<bool> CheckUsernameExistAsync(string username) {
+        private async Task<bool> CheckUsernameExistAsync(string username)
+        {
             return await _context.Users.AnyAsync(u => u.Username == username);
         }
 
-        private async Task<bool> CheckEmailExistAsync(string email) {
+        private async Task<bool> CheckEmailExistAsync(string email)
+        {
             return await _context.Users.AnyAsync(u => u.Email == email);
         }
 
-        private string CheckPasswordStrength(string password) {
+        private string CheckPasswordStrength(string password)
+        {
             StringBuilder sb = new();
 
             if (password.Length < 9) { sb.Append("Minimum password length should be 8" + Environment.NewLine); }
 
-            if (!(Regex.IsMatch(password, "[a-z]") && Regex.IsMatch(password, "[A-Z]") && Regex.IsMatch(password, "[0-9]"))) {
+            if (!(Regex.IsMatch(password, "[a-z]") && Regex.IsMatch(password, "[A-Z]") && Regex.IsMatch(password, "[0-9]")))
+            {
                 sb.Append("Password should be alphanumeric" + Environment.NewLine);
             }
             
@@ -101,7 +110,8 @@ namespace AngularAuthAPI.Controllers
             return sb.ToString();
         }
 
-        private string CreateJwtToken(User userObj) {
+        private string CreateJwtToken(User userObj)
+        {
             JwtSecurityTokenHandler jwtTokenHandler = new();
             var key = Encoding.ASCII.GetBytes("veryverysecret.....");
             var identity = new ClaimsIdentity(new Claim[] {
@@ -111,7 +121,8 @@ namespace AngularAuthAPI.Controllers
 
             var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 
-            var tokenDescriptor = new SecurityTokenDescriptor{
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
                 Subject = identity,
                 SigningCredentials = credentials,
                 Expires = DateTime.UtcNow.AddSeconds(10)
@@ -122,7 +133,8 @@ namespace AngularAuthAPI.Controllers
             return jwtTokenHandler.WriteToken(token);
         }
 
-        public string CreateRefreshToken() {
+        public string CreateRefreshToken()
+        {
             var tokenBytes = RandomNumberGenerator.GetBytes(64);
             var refreshToken = Convert.ToBase64String(tokenBytes);
 
@@ -133,9 +145,11 @@ namespace AngularAuthAPI.Controllers
             return refreshToken;
         }
 
-        private ClaimsPrincipal GetPrincipalFromExpiryToken(string token) {
+        private ClaimsPrincipal GetPrincipalFromExpiryToken(string token)
+        {
             var key = Encoding.ASCII.GetBytes("veryverysecret.....");
-            var tokenValidationParameters = new TokenValidationParameters {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
@@ -149,7 +163,8 @@ namespace AngularAuthAPI.Controllers
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
             var jwtSecurityToken = securityToken as JwtSecurityToken;
 
-            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase)) {
+            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
                 throw new SecurityTokenException("This is an invalid token!");
             }
 
@@ -158,12 +173,14 @@ namespace AngularAuthAPI.Controllers
         
         [Authorize]
         [HttpGet]
-        public async Task<ActionResult<User>> GetAllUsers() {
+        public async Task<ActionResult<User>> GetAllUsers()
+        {
             return Ok(await _context.Users.ToListAsync());
         }
 
         [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh(TokenApiDto tokenApiDto) {
+        public async Task<IActionResult> Refresh(TokenApiDto tokenApiDto)
+        {
             if (tokenApiDto is null) { return BadRequest("Invalid client request!"); }
 
             string accessToken = tokenApiDto.AccessToken;
@@ -181,9 +198,81 @@ namespace AngularAuthAPI.Controllers
             user.RefreshToken = newRefreshToken;
             await _context.SaveChangesAsync();
 
-            return Ok(new TokenApiDto() {
+            return Ok(new TokenApiDto() 
+            {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken
+            });
+        }
+
+        [HttpPost("send-reset-email/{email}")]
+        public async Task<IActionResult> SendEmail(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user is null) {
+                return NotFound(new
+                {
+                    StatusCode = 404,
+                    Message = "Email not found in database!"
+                });
+            }
+
+            var tokenBytes = RandomNumberGenerator.GetBytes(64);
+            var emailToken = Convert.ToBase64String(tokenBytes);
+
+            user.ResetPasswordToken = emailToken;
+            user.ResetPasswordExpiry = DateTime.UtcNow.AddMinutes(15);
+
+            string from = _configuration["EmailSettings: From"];
+            var emailModel = new EmailModel(email, "Reset password", EmailBody.EmailStringBody(email, emailToken));
+            
+            _emailService.SendEmail(emailModel);
+            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return Ok(new 
+            {
+                StatusCode = 200,
+                Message = "Email sent successfully!"
+            });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPassDto resetPassDto)
+        {
+            var newToken = resetPassDto.EmailToken.Replace(" ", "+");
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == resetPassDto.Email);
+
+            if (user is null) {
+                return NotFound(new
+                {
+                    StatusCode = 404,
+                    Message = "User do not exits!"
+                });
+            }
+
+            var tokenCode = user.ResetPasswordToken;
+            DateTime emailTokenExpiry = user.ResetPasswordExpiry;
+
+            if (tokenCode != resetPassDto.EmailToken || emailTokenExpiry < DateTime.UtcNow)
+            {
+                return BadRequest(new
+                {
+                    StatusCode = 400,
+                    Message = "Invalid reset link!"
+                });
+            }
+
+            user.Password = PasswordHasher.HashPassword(resetPassDto.NewPassword);
+            
+            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                StatusCode = 200,
+                Message = "Password reseted successfully!"
             });
         }
     }

@@ -1,5 +1,6 @@
 using System.Text;
 using AngularAuthAPI.Context;
+using AngularAuthAPI.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -29,6 +30,7 @@ builder.Services.AddAuthentication(auth => {
         ClockSkew = TimeSpan.Zero // matches the time configured in controller
     };
 });
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 
