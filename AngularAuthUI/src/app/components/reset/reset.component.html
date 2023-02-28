@@ -1,1 +1,47 @@
-<p>reset works!</p>
+<div class="outer">
+    <div class="container">
+        <div class="row">
+            <div class="offset-md-2 col-lg-5 col-md-7 offset-lg-4 offset-md-3">
+                <div class="panel border bg-white">
+                    <div class="panel-heading">
+                        <h3 class="pt-3 font-weight-bold">Reset Password</h3>
+                    </div>
+
+                    <div class="panel-body p-3">
+                        <form [formGroup]="resetForm">
+                            <div class="form-group pt-3">
+                                <div class="input-field" [class.error]="resetForm.controls['password'].dirty && resetForm.hasError('required', 'password')">
+                                    <i class="bi bi-shield-lock-fill p-2"></i>
+                                    <input formControlName="password" [type]="typeNP" placeholder="New Password" />
+                                    <i (click)="hideShowPassNP()" class="bi {{ eyeIconNP }}"></i>
+                                </div>
+                            </div>
+                            <small *ngIf="resetForm.controls['password'].dirty && resetForm.hasError('required', 'password')" class="text-danger p-2">
+                                *New password is required
+                            </small>
+
+                            <div class="form-group pt-3">
+                                <div class="input-field" [class.error]="resetForm.controls['confirmPass'].dirty && resetForm.hasError('required', 'confirmPass')">
+                                    <i class="bi bi-shield-lock-fill p-2"></i>
+                                    <input formControlName="confirmPass" [type]="typeCP" placeholder="Confirm Password" />
+                                    <i (click)="hideShowPassCP()" class="bi {{ eyeIconCP }}"></i>
+                                </div>
+                            </div>
+                            <small *ngIf="resetForm.controls['confirmPass'].dirty && resetForm.hasError('required', 'confirmPass')" class="text-danger p-2">
+                                *Confirm password is required
+                            </small>
+                            
+                            <small *ngIf="resetForm.hasError('confirmPasswordValidator', 'confirmPass')" class="text-danger p-2">
+                                *Password doesn't match
+                            </small>
+
+                            <div>
+                                <button (click)="reset()" type="submit" class="btn btn-primary btn-block mt-4 w-100">Confirm new password</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

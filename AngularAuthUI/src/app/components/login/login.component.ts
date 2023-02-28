@@ -82,7 +82,7 @@ export class LoginComponent implements OnInit {
     // api call
     this.resetService.sendResetPassLink(this.resetPasswordEmail).subscribe({
       next: res => {
-        this.toast.success({ detail: 'SUCCESS', summary: 'Reseted successfully', duration: 3000 })
+        this.toast.success({ detail: 'SUCCESS', summary: 'Reset link sent successfully!', duration: 3000 })
         this.resetPasswordEmail = ''
 
         const buttonRef = document.getElementById('close-btn')
